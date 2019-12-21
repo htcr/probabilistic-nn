@@ -1,6 +1,6 @@
 A very simple example of **probabilistic** neural network/**uncertainty-aware** neural network.
 
-* Intro
+## Intro
 
 Given an input data point, neural networks usually produce a deterministic output value. However, due to the noise in labels - or the stochastic nature in the real mapping - the output given an input might be a distribution. 
 
@@ -8,13 +8,13 @@ Therefore, it may be benificial if the network can produce the distribution of t
 
 This is a very simple example of how we may enable the network to estimate that distribution. The network has two heads, one predicts the expectation, the other predicts the variance. 
 
-* Result
+## Results
 
 The training data is sampled from a gaussian distribution whose mean and variance varies according to the input x. The predicted distribution is compared against the true one. The network not only fits the expected output value correctly, but is also aware of the varying level of uncertainty at different locations.
 
 ![Results on a toy example](/result.png)
 
-* Reference
+## Reference
 
 Checkout this paper for details:
 
