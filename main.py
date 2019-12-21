@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 
 mean_func = lambda x: np.sin(x * np.pi)
 var_func = lambda x: 0.2* np.abs(x)
-
+radius = 1.0
 
 class ToyDataset(Dataset):
     def __init__(self):
         self.mean_func = mean_func
         self.var_func = var_func
-        self.radius = 1.0
+        self.radius = radius
 
     def __getitem__(self, index):
         x = np.random.uniform(low=-self.radius, high=self.radius)
@@ -60,7 +60,7 @@ class Net(nn.Module):
         # x = self.fc3(x)
         # x = F.relu(x)
         mean_x = self.mean_head(x)
-        var_x = F.elu(self.var_head(x))
+        var_x = F.elu(self.var_head(x)) + 1.0
         return mean_x, var_x
 
 
@@ -84,12 +84,10 @@ def train(max_iter=1000):
     dataset = ToyDataset()
     data_loader_iter = iter(DataLoader(dataset, batch_size=128))
     net = Net()
-    # net = net.cuda()
     optimizer = optim.Adam(net.parameters(), lr=0.001)
     for i in range(max_iter):
         optimizer.zero_grad()
         x, y_x = data_loader_iter.next()
-        # x, y_x = x.cuda(), y_x.cuda()
         mean_x, var_x = net.forward(x)
         loss = neg_log_likelihood_loss(y_x, mean_x, var_x)
         loss.backward()
@@ -101,7 +99,7 @@ def train(max_iter=1000):
 def evaluate(model_path):
     net = Net()
     net.load_state_dict(torch.load(model_path))
-    sample_x = np.arange(start=-1.0, stop=1.0, step=0.001).astype(np.float32)
+    sample_x = np.arange(start=-radius, stop=radius, step=0.001).astype(np.float32)
     sample_x = torch.Tensor(sample_x.reshape((-1, 1)))
     mean_x, var_x = net.forward(sample_x)
 
@@ -123,18 +121,17 @@ def evaluate(model_path):
 
     ax10 = axs[1, 0]
     ax10.set_title('Mean Comparison')
-    ax10.plot(sample_x, gt_mean_x, color='green')
     ax10.plot(sample_x, mean_x, color='blue')
+    ax10.plot(sample_x, gt_mean_x, color='green')
 
     ax11 = axs[1, 1]
     ax11.set_title('Var Comparison')
-    ax11.plot(sample_x, gt_var_x, color='green')
     ax11.plot(sample_x, var_x, color='blue')
+    ax11.plot(sample_x, gt_var_x, color='green')
 
+    fig.tight_layout()
     plt.show()
 
-    
-    
 
-# train(1000)
+train(1000)
 evaluate('ckpt-1000.pth')
